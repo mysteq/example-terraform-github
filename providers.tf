@@ -13,4 +13,6 @@ terraform {
   }
 }
 
-provider "github" {}
+provider "github" {
+  owner = "mysteq"
+}
