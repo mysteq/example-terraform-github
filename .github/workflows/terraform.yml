@@ -44,6 +44,7 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: terraform plan -no-color
       continue-on-error: true
     
