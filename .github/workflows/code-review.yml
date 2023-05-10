@@ -3,9 +3,7 @@ name: Code Review
 
 # yamllint disable-line rule:truthy
 on:
-#  pull_request:
-#    branches:
-#      - main
+  pull_request:
   workflow_dispatch: {}
 
 jobs:
