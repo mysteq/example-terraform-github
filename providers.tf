@@ -14,5 +14,5 @@ terraform {
 }
 
 provider "github" {
-  owner = "mysteq"
+  token = var.github_token
 }
