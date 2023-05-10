@@ -9,6 +9,9 @@ on:
 
 jobs:
   terraformplan:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     name: "Terraform Plan"
     runs-on: ubuntu-latest
     permissions:
@@ -43,9 +46,13 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      run: terraform plan -no-color
+      run: terraform plan -input=false -no-color -out tf.plan
       continue-on-error: true
-    
+
+    - name: Terraform Show
+      id: show
+      run: terraform show -no-color tf.plan 2>&1 > /tmp/plan.txt
+
     - uses: actions/github-script@v6
       if: github.event_name == 'pull_request'
       env:
