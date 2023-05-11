@@ -192,3 +192,8 @@ jobs:
                 body: output
               })
             }
+      - name: Close Pull
+        if: steps.apply.outputs.exit_code == 0
+        run: gh pr close --comment "Auto-closing pull request" --delete-branch "1"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
