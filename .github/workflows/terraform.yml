@@ -194,6 +194,11 @@ jobs:
                 body: output
               })
             }
+
+      - name: Sleep for 5 seconds
+        run: sleep 5s
+        shell: bash
+
       - name: Close Pull
         if: steps.apply.outputs.exit_code == 0
         run: gh pr merge -m -d "1"
