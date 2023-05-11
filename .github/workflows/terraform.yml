@@ -7,15 +7,14 @@ on:
       - main
   workflow_dispatch: {}
 
-permissions:
-  pull-requests: write
-
 jobs:
   terraformplan:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     name: "Terraform Plan"
+    permissions:
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -118,6 +117,9 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     name: "Terraform Apply"
+    permissions:
+      contents: write
+      pull-requests: write
     environment: Production
     runs-on: ubuntu-latest
     steps:
