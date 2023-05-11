@@ -164,7 +164,7 @@ jobs:
             })
       
             // 2. Prepare format of the comment
-            const output = `#### Terraform Initialization 🖌\`${{ steps.fmt.outcome }}\`
+            const output = `#### Terraform Initialization 🖌\`${{ steps.init.outcome }}\`
             #### Terraform Apply 🎯\`${{ steps.apply.outcome }}\`
             <details><summary>Apply Output</summary>
       
