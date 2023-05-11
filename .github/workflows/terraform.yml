@@ -128,7 +128,6 @@ jobs:
       - uses: actions/download-artifact@master
         with:
           name: tfplan
-          path: tf.plan
 
       - name: Terraform Init
         id: init
