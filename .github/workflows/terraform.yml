@@ -7,15 +7,14 @@ on:
       - main
   workflow_dispatch: {}
 
-permissions:
-  pull-requests: write
-
 jobs:
   terraformplan:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     name: "Terraform Plan"
+    permissions:
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -118,6 +117,9 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     name: "Terraform Apply"
+    permissions:
+      contents: write
+      pull-requests: write
     environment: Production
     runs-on: ubuntu-latest
     steps:
@@ -147,3 +149,53 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: terraform apply -auto-approve -input=false tf.plan
+
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Apply')
+            })
+      
+            // 2. Prepare format of the comment
+            const output = `#### Terraform Initialization 🖌\`${{ steps.init.outcome }}\`
+            #### Terraform Apply 🎯\`${{ steps.apply.outcome }}\`
+            <details><summary>Apply Output</summary>
+      
+            \`\`\`\n
+            ${{ steps.apply.outputs.stdout }}
+            \`\`\`
+      
+            </details>
+      
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+      
+            // 3. If we have a comment, update it, otherwise create a new one
+            if (botComment) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }
+      - name: Close Pull
+        if: steps.apply.outputs.exit_code == 0
+        run: gh pr close --comment "Auto-closing pull request" --delete-branch "1"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
