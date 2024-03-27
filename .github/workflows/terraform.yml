@@ -7,6 +7,15 @@ on:
       - main
   workflow_dispatch: {}
 
+# Declare default permissions as read only.
+permissions: 
+  id-token: write
+  contents: read
+
+concurrency:
+  group: terraform
+  cancel-in-progress: false
+
 jobs:
   terraformplan:
     concurrency:
